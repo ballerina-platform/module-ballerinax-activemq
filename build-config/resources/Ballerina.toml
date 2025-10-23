@@ -11,9 +11,3 @@ distribution = "2201.12.10"
 
 [platform.java21]
 graalvmCompatible = true
-
-[[platform.java21.dependency]]
-path = "./lib/activemq-native-@project.version@.jar"
-groupId = "io.ballerina.lib"
-artifactId = "activemq-native"
-version = "@project.version@"
