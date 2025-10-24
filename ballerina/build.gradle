@@ -80,7 +80,6 @@ task commitTomlFiles {
     }
 }
 
-build.dependsOn copyToLib
 build.dependsOn ":${packageName}-native:build"
 
 test.dependsOn ":${packageName}-native:build"

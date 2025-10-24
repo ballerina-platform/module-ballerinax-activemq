@@ -33,6 +33,11 @@ configurations {
 dependencies {
     checkstyle project(":checkstyle")
     checkstyle "com.puppycrawl.tools:checkstyle:${checkstylePluginVersion}"
+
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    implementation 'jakarta.jms:jakarta.jms-api:3.1.0'
+    implementation 'org.apache.activemq:activemq-client:6.1.8'
+    dist 'org.apache.activemq:activemq-client:6.1.8'
 }
 
 tasks.withType(JavaCompile) {
@@ -91,14 +96,5 @@ jar {
     dependsOn configurations.dist
     from { configurations.dist.collect { it.isDirectory() ? it : zipTree(it) } } {
         exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    }
-}
-
-compileJava {
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
     }
 }
