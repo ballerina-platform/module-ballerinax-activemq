@@ -1,0 +1,19 @@
+[package]
+org = "ballerinax"
+name = "activemq"
+version = "0.1.0"
+authors = ["Ballerina"]
+keywords = ["service", "client", "messaging", "network", "pubsub"]
+repository = "https://github.com/ballerina-platform/module-ballerinax-activemq"
+icon = "icon.png"
+license = ["Apache-2.0"]
+distribution = "2201.12.10"
+
+[platform.java21]
+graalvmCompatible = true
+
+[[platform.java21.dependency]]
+path = "./lib/activemq-native-0.1.0-SNAPSHOT.jar"
+groupId = "io.ballerina.lib"
+artifactId = "activemq-native"
+version = "0.1.0-SNAPSHOT"
