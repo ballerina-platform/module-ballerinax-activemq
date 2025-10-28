@@ -17,7 +17,7 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'checkstyle'
     id 'com.github.spotbugs'
 }
@@ -33,9 +33,15 @@ configurations {
 dependencies {
     checkstyle project(":checkstyle")
     checkstyle "com.puppycrawl.tools:checkstyle:${checkstylePluginVersion}"
+
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    implementation group: 'io.ballerina.stdlib', name: 'crypto-native', version: "${stdlibCryptoVersion}"
+    implementation group: 'jakarta.jms', name: 'jakarta.jms-api', version: "${jmsVersion}"
+    implementation group: 'org.apache.activemq', name: 'activemq-client', version: "${activeMQVersion}"
+    implementation group: 'org.fusesource.hawtbuf', name: 'hawtbuf', version: "${hawtbufVersion}"
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -74,7 +80,7 @@ spotbugsTest {
     enabled = false
 }
 
-tasks.withType(Checkstyle) {
+tasks.withType(Checkstyle).configureEach {
     exclude '**/module-info.java'
 }
 

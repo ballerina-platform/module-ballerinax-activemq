@@ -57,17 +57,29 @@ configurations {
 }
 
 dependencies {
+    /* ActiveMQ dependencies */
+    externalJars(group: 'org.apache.activemq', name: 'activemq-client', version: "${activeMQVersion}") {
+        transitive = true
+    }
+
+    /* JMS dependencies */
+    externalJars(group: 'jakarta.jms', name: 'jakarta.jms-api', version: "${jmsVersion}") {
+        transitive = false
+    }
 }
 
-task updateTomlFiles {
+tasks.register('updateTomlFiles') {
     doLast {
         def newBallerinaToml = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
         newBallerinaToml = newBallerinaToml.replace("@toml.version@", tomlVersion)
+        newBallerinaToml = newBallerinaToml.replace("@activemq.version@", activeMQVersion)
+        newBallerinaToml = newBallerinaToml.replace("@jms.version@", jmsVersion)
+        newBallerinaToml = newBallerinaToml.replace("@hawtbuf.version@", hawtbufVersion)
         ballerinaTomlFile.text = newBallerinaToml
     }
 }
 
-task commitTomlFiles {
+tasks.register('commitTomlFiles') {
     doLast {
         project.exec {
             ignoreExitValue true
