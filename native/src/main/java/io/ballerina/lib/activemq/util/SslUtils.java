@@ -18,24 +18,23 @@
 
 package io.ballerina.lib.activemq.util;
 
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.crypto.nativeimpl.Decode;
+
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.Objects;
+import java.util.UUID;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.Objects;
-import java.util.UUID;
 
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.CERT_FILE;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.CRYPTO_TRUSTSTORE_PASSWORD;
@@ -44,7 +43,6 @@ import static io.ballerina.lib.activemq.util.ActiveMQConstants.KEY_FILE;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.KEY_PASSWORD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.KEY_STORE_PASSWORD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.KEY_STORE_PATH;
-import static io.ballerina.lib.activemq.util.ActiveMQConstants.PROTOCOL;
 
 /**
  * SSL utility functions for ActiveMQ SSL/TLS configuration.

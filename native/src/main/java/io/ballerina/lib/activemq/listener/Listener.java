@@ -55,11 +55,13 @@ import static io.ballerina.lib.activemq.util.SslUtils.getKeyManagers;
 import static io.ballerina.lib.activemq.util.SslUtils.getTrustmanagers;
 
 /**
- * Native class for the Ballerina ActiveMQ Listener.
+ * Native implementation of the Ballerina ActiveMQ Listener. This class manages JMS connections,
+ * service attachments, and message consumer lifecycle.
  *
  * @since 0.1.0
  */
 public final class Listener {
+    // Native data keys for storing JMS objects in Ballerina listener object
     static final String NATIVE_CONNECTION = "native.connection";
     static final String NATIVE_SERVICE_LIST = "native.service.list";
     static final String NATIVE_SERVICE = "native.service";
@@ -68,8 +70,17 @@ public final class Listener {
     static final String DURABLE = "DURABLE";
 
     private Listener() {
+        // Utility class - prevent instantiation
     }
 
+    /**
+     * Initializes the ActiveMQ listener by creating a JMS connection factory and connection.
+     *
+     * @param bListener       the Ballerina listener object
+     * @param url             the broker URL
+     * @param configurations  the connection configurations
+     * @return null on success, BError on failure
+     */
     @SuppressWarnings("unchecked")
     public static Object init(BObject bListener, BString url, BMap<BString, Object> configurations) {
         try {
@@ -77,7 +88,7 @@ public final class Listener {
             ConnectionConfig config = new ConnectionConfig(configurations);
             ActiveMQConnectionFactory factory;
 
-            // Configure SSL/TLS if secureSocket is provided
+            // Configure SSL/TLS connection factory if secure socket configuration is provided
             if (Objects.nonNull(config.secureSocket())) {
                 ActiveMQSslConnectionFactory sslFactory = new ActiveMQSslConnectionFactory(brokerURL);
                 BMap<BString, Object> secureSocket = config.secureSocket();
@@ -125,6 +136,16 @@ public final class Listener {
         return null;
     }
 
+    /**
+     * Attaches a Ballerina service to the listener. Creates a JMS session and consumer for the
+     * service based on its configuration.
+     *
+     * @param env        the Ballerina runtime environment
+     * @param bListener  the Ballerina listener object
+     * @param bService   the Ballerina service to attach
+     * @param name       reserved for future use (currently unused)
+     * @return null on success, BError on failure
+     */
     public static Object attach(Environment env, BObject bListener, BObject bService, Object name) {
         Connection connection = (Connection) bListener.getNativeData(NATIVE_CONNECTION);
         Object started = bListener.getNativeData(LISTENER_STARTED);
@@ -154,6 +175,12 @@ public final class Listener {
         return null;
     }
 
+    /**
+     * Detaches a Ballerina service from the listener by stopping its message receiver.
+     *
+     * @param bService  the Ballerina service to detach
+     * @return null on success, BError on failure
+     */
     public static Object detach(BObject bService) {
         Object receiver = bService.getNativeData(NATIVE_RECEIVER);
         try {
@@ -169,6 +196,13 @@ public final class Listener {
         return null;
     }
 
+    /**
+     * Starts the ActiveMQ listener by starting the JMS connection and initiating message
+     * consumption for all attached services.
+     *
+     * @param bListener  the Ballerina listener object
+     * @return null on success, BError on failure
+     */
     public static Object start(BObject bListener) {
         Connection connection = (Connection) bListener.getNativeData(NATIVE_CONNECTION);
         List<BObject> bServices = getBServices(bListener);
@@ -187,6 +221,13 @@ public final class Listener {
         return null;
     }
 
+    /**
+     * Gracefully stops the ActiveMQ listener. Stops all message receivers first, then stops and
+     * closes the JMS connection, allowing in-flight messages to complete processing.
+     *
+     * @param bListener  the Ballerina listener object
+     * @return null on success, BError on failure
+     */
     public static Object gracefulStop(BObject bListener) {
         Connection nativeConnection = (Connection) bListener.getNativeData(NATIVE_CONNECTION);
         List<BObject> bServices = getBServices(bListener);
@@ -207,6 +248,13 @@ public final class Listener {
         return null;
     }
 
+    /**
+     * Immediately stops the ActiveMQ listener. Stops all message receivers, then stops and closes
+     * the JMS connection. In-flight messages may not complete processing.
+     *
+     * @param bListener  the Ballerina listener object
+     * @return null on success, BError on failure
+     */
     public static Object immediateStop(BObject bListener) {
         Connection nativeConnection = (Connection) bListener.getNativeData(NATIVE_CONNECTION);
         List<BObject> bServices = getBServices(bListener);
@@ -226,6 +274,14 @@ public final class Listener {
         return null;
     }
 
+    /**
+     * Creates a JMS message consumer based on the service configuration (queue or topic).
+     *
+     * @param session    the JMS session
+     * @param svcConfig  the service configuration
+     * @return the configured message consumer
+     * @throws JMSException if consumer creation fails
+     */
     private static MessageConsumer getConsumer(Session session, ServiceConfig svcConfig)
             throws JMSException {
         MessageConsumer baseConsumer;
@@ -257,6 +313,12 @@ public final class Listener {
         return consumer;
     }
 
+    /**
+     * Generates an ActiveMQ prefetch policy from the configuration.
+     *
+     * @param prefetchPolicyConfig  the prefetch policy configuration
+     * @return the configured ActiveMQ prefetch policy
+     */
     private static ActiveMQPrefetchPolicy generatePrefetchPolicy(
             PrefetchPolicyConfig prefetchPolicyConfig) {
         ActiveMQPrefetchPolicy prefetchPolicy = new ActiveMQPrefetchPolicy();
@@ -267,6 +329,12 @@ public final class Listener {
         return prefetchPolicy;
     }
 
+    /**
+     * Generates an ActiveMQ redelivery policy from the configuration.
+     *
+     * @param redeliveryPolicyConfig  the redelivery policy configuration
+     * @return the configured ActiveMQ redelivery policy
+     */
     private static RedeliveryPolicy generateRedeliveryPolicy(
             RedeliveryPolicyConfig redeliveryPolicyConfig) {
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
@@ -282,6 +350,12 @@ public final class Listener {
         return redeliveryPolicy;
     }
 
+    /**
+     * Generates Java Properties from Ballerina connection configuration map.
+     *
+     * @param connectionConfigs  the Ballerina connection configurations
+     * @return Java Properties object with connection properties
+     */
     @SuppressWarnings("unchecked")
     private static Properties generateConnectionProperties(BMap<BString, Object> connectionConfigs) {
         BMap<BString, BString> additionalProperties = (BMap<BString, BString>) connectionConfigs
@@ -293,13 +367,20 @@ public final class Listener {
         return properties;
     }
 
+    /**
+     * Retrieves the list of attached Ballerina services from the listener's native data.
+     *
+     * @param bListener  the Ballerina listener object
+     * @return list of attached Ballerina service objects
+     * @throws IllegalStateException if the native data is not a List<BObject>
+     */
     @SuppressWarnings("unchecked")
     private static List<BObject> getBServices(BObject bListener) {
         Object nativeData = bListener.getNativeData(NATIVE_SERVICE_LIST);
         if (nativeData instanceof List<?>) {
             return (List<BObject>) nativeData;
         } else {
-            // This should never happen
+            // This should never happen - indicates a programming error
             throw new IllegalStateException("Expected List<BObject> but got: " +
                     (nativeData != null ? nativeData.getClass() : "null"));
         }

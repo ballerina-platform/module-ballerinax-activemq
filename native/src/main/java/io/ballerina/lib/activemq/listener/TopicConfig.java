@@ -18,8 +18,6 @@
 
 package io.ballerina.lib.activemq.listener;
 
-import io.ballerina.lib.activemq.util.ActiveMQConstants;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;

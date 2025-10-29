@@ -43,7 +43,9 @@ import static io.ballerina.lib.activemq.util.CommonUtils.createError;
 import static io.ballerina.lib.activemq.util.ModuleUtils.getModule;
 
 /**
- * A {MessageDispatcher} dispatches JMS messages into the ActiveMQ service.
+ * Dispatches JMS messages to the Ballerina ActiveMQ service. This class manages the invocation
+ * of service methods (onMessage and onError) in the Ballerina runtime using virtual threads for
+ * concurrent message processing.
  *
  * @since 0.1.0
  */
@@ -55,12 +57,27 @@ public class MessageDispatcher {
     private final Session session;
     private final OnErrorCallback onErrorCallback = new OnErrorCallback();
 
+    /**
+     * Creates a new message dispatcher.
+     *
+     * @param ballerinaRuntime  the Ballerina runtime for invoking service methods
+     * @param nativeService     the wrapped Ballerina service
+     * @param session           the JMS session for creating caller objects
+     */
     MessageDispatcher(Runtime ballerinaRuntime, Service nativeService, Session session) {
         this.ballerinaRuntime = ballerinaRuntime;
         this.nativeService = nativeService;
         this.session = session;
     }
 
+    /**
+     * Dispatches a JMS message to the Ballerina service's onMessage method. This method spawns a
+     * virtual thread to invoke the Ballerina service method asynchronously, allowing concurrent
+     * message processing.
+     *
+     * @param message        the JMS message to dispatch
+     * @param onMsgCallback  the callback to notify when message processing completes
+     */
     public void onMessage(Message message, OnMsgCallback onMsgCallback) {
         Thread.startVirtualThread(() -> {
             try {
@@ -79,6 +96,14 @@ public class MessageDispatcher {
         });
     }
 
+    /**
+     * Prepares the parameter array for invoking the Ballerina onMessage method. Matches parameters
+     * by type (Caller object or Message record) and populates them accordingly.
+     *
+     * @param message  the JMS message
+     * @return array of arguments for the Ballerina method invocation
+     * @throws JMSException if message conversion fails
+     */
     private Object[] getOnMessageParams(Message message) throws JMSException {
         Parameter[] parameters = this.nativeService.getOnMessageMethod().getParameters();
         Object[] args = new Object[parameters.length];
@@ -97,18 +122,31 @@ public class MessageDispatcher {
         return args;
     }
 
+    /**
+     * Creates a Ballerina Caller object with the JMS session attached as native data.
+     *
+     * @return the Ballerina Caller object
+     */
     private BObject getCaller() {
         BObject caller = ValueCreator.createObjectValue(getModule(), BCALLER_NAME);
         caller.addNativeData(NATIVE_SESSION, session);
         return caller;
     }
 
+    /**
+     * Dispatches an error to the Ballerina service's onError method (if defined). This method
+     * spawns a virtual thread to invoke the error handler asynchronously. If no error handler is
+     * defined, the error is printed to stderr.
+     *
+     * @param t  the throwable/error that occurred
+     */
     public void onError(Throwable t) {
         Thread.startVirtualThread(() -> {
             try {
                 ERR_OUT.println("Unexpected error occurred while message processing: " + t.getMessage());
                 Optional<RemoteMethodType> onError = nativeService.getOnError();
                 if (onError.isEmpty()) {
+                    // No error handler defined in the service, print stack trace
                     t.printStackTrace();
                     return;
                 }

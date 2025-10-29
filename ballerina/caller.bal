@@ -16,33 +16,49 @@
 
 import ballerina/jballerina.java;
 
-# Represents an ActiveMQ caller, which can be used to mark ActiveMQ message as received.
+# Represents an ActiveMQ caller, which provides operations for message acknowledgement and
+# transaction management.
 public isolated client class Caller {
 
-    # Mark an ActiveMQ message as received.
+    # Acknowledges an ActiveMQ message. This operation is only meaningful when using
+    # `CLIENT_ACKNOWLEDGE` mode. In this mode, calling `acknowledge` on one message acknowledges
+    # all messages that have been received in the session up to and including this message.
     #
-    # + message - ActiveMQ message record
-    # + return - `activemq:Error` if there is an error in the execution or else '()'
+    # ```ballerina
+    # remote function onMessage(activemq:Message message, activemq:Caller caller) returns error? {
+    #     // Process the message
+    #     check caller->acknowledge(message);
+    # }
+    # ```
+    #
+    # + message - The ActiveMQ message to acknowledge
+    # + return - `activemq:Error` if acknowledgement fails, `()` otherwise
     isolated remote function acknowledge(Message message) returns Error? = @java:Method {
         'class: "io.ballerina.lib.activemq.listener.Caller"
     } external;
 
-    # Commits all messages received in this transaction and releases any locks currently held.
+    # Commits all messages received in this transacted session and releases any locks currently
+    # held. This operation is only valid when using `SESSION_TRANSACTED` acknowledgement mode.
+    # After committing, a new transaction is automatically started.
+    #
     # ```ballerina
     # check caller->'commit();
     # ```
     #
-    # + return - An `activemq:Error` if there is an error or else `()`
+    # + return - `activemq:Error` if the commit fails, `()` otherwise
     isolated remote function 'commit() returns Error? = @java:Method {
         'class: "io.ballerina.lib.activemq.listener.Caller"
     } external;
 
-    # Rolls back any messages received in this transaction and releases any locks currently held.
+    # Rolls back any messages received in this transacted session and releases any locks currently
+    # held. This operation is only valid when using `SESSION_TRANSACTED` acknowledgement mode.
+    # Rolled back messages will be redelivered according to the configured redelivery policy.
+    #
     # ```ballerina
     # check caller->'rollback();
     # ```
     #
-    # + return - An `activemq:Error` if there is an error or else `()`
+    # + return - `activemq:Error` if the rollback fails, `()` otherwise
     isolated remote function 'rollback() returns Error? = @java:Method {
         'class: "io.ballerina.lib.activemq.listener.Caller"
     } external;

@@ -30,7 +30,8 @@ import java.util.Objects;
 import static io.ballerina.lib.activemq.util.CommonUtils.createError;
 
 /**
- * Native class for the Ballerina ActiveMQ Caller.
+ * Native implementation of the Ballerina ActiveMQ Caller. Provides operations for message
+ * acknowledgement and transaction management (commit/rollback).
  *
  * @since 0.1.0
  */
@@ -39,8 +40,15 @@ public class Caller {
     static final String NATIVE_SESSION = "native.session";
 
     private Caller() {
+        // Utility class - prevent instantiation
     }
 
+    /**
+     * Commits the current transaction for the JMS session.
+     *
+     * @param caller  the Ballerina caller object
+     * @return null on success, BError on failure
+     */
     public static Object commit(BObject caller) {
         Session nativeSession = (Session) caller.getNativeData(NATIVE_SESSION);
         try {
@@ -52,6 +60,12 @@ public class Caller {
         return null;
     }
 
+    /**
+     * Rolls back the current transaction for the JMS session.
+     *
+     * @param caller  the Ballerina caller object
+     * @return null on success, BError on failure
+     */
     public static Object rollback(BObject caller) {
         Session nativeSession = (Session) caller.getNativeData(NATIVE_SESSION);
         try {
@@ -64,6 +78,12 @@ public class Caller {
         return null;
     }
 
+    /**
+     * Acknowledges a JMS message. Only applicable for CLIENT_ACKNOWLEDGE mode.
+     *
+     * @param message  the Ballerina message record
+     * @return null on success, BError on failure
+     */
     public static Object acknowledge(BMap<BString, Object> message) {
         try {
             Object nativeMessage = message.getNativeData(NATIVE_MESSAGE);
