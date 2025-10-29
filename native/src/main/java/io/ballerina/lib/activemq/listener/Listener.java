@@ -92,7 +92,14 @@ public final class Listener {
                 factory = new ActiveMQConnectionFactory(brokerURL);
             }
 
-            if (Objects.nonNull(config.username()) && Objects.nonNull(config.password())) {
+            String username = config.username();
+            String password = config.password();
+            if ((username != null && password == null) || (username == null && password != null)) {
+                throw new IllegalArgumentException(
+                        "Username and password must both be provided or both be omitted for anonymous access"
+                );
+            }
+            if (username != null) {
                 factory.setUserName(config.username());
                 factory.setPassword(config.password());
             }
@@ -113,13 +120,12 @@ public final class Listener {
             bListener.addNativeData(NATIVE_CONNECTION, connection);
             bListener.addNativeData(NATIVE_SERVICE_LIST, new ArrayList<BObject>());
         } catch (Exception e) {
-            return createError(ACTIVEMQ_ERROR, "Failed to initialize listener", e); // TODO: specific error is not shown
+            return createError(ACTIVEMQ_ERROR, String.format("Failed to initialize listener: %s", e.getMessage()), e);
         }
         return null;
     }
 
     public static Object attach(Environment env, BObject bListener, BObject bService, Object name) {
-        // TODO: break this method into smaller methods
         Connection connection = (Connection) bListener.getNativeData(NATIVE_CONNECTION);
         Object started = bListener.getNativeData(LISTENER_STARTED);
         try {
@@ -130,6 +136,7 @@ public final class Listener {
             int sessionAckMode = getAcknowledgementMode(svcConfig.ackMode());
             Session session = connection.createSession(sessionAckMode);
             MessageConsumer consumer = getConsumer(session, svcConfig);
+
             MessageDispatcher messageDispatcher = new MessageDispatcher(env.getRuntime(), nativeService, session);
             MessageReceiver receiver = new MessageReceiver(
                     session, consumer, messageDispatcher, svcConfig.pollingInterval(), svcConfig.receiveTimeout());

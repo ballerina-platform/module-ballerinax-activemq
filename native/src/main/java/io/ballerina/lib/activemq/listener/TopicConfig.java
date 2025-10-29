@@ -59,7 +59,7 @@ import static io.ballerina.lib.activemq.util.ActiveMQConstants.TOPIC_NAME;
  * @param pollingInterval   The polling interval in milliseconds
  * @param receiveTimeout    The timeout to wait till a `receive` action finishes when there are no messages
  * @param exclusive        If {@code true}, the subscription is exclusive, meaning only one consumer for the topic
- * @param redeliveryPolicy The redelivery policy configuration for handling message redelivery
+ * @param redeliveryPolicyConfig The redelivery policy configuration for handling message redelivery
  *
  * @since 0.1.0
  */
@@ -84,7 +84,9 @@ public record TopicConfig(String ackMode, String topicName, String messageSelect
                 ((BDecimal) configurations.get(RECEIVE_TIMEOUT)).decimalValue().multiply(MILLISECOND_MULTIPLIER)
                         .longValue(),
                 configurations.getBooleanValue(EXCLUSIVE),
-                new RedeliveryPolicyConfig((BMap<BString, Object>) configurations.getMapValue(REDELIVERY_POLICY))
+                configurations.getMapValue(REDELIVERY_POLICY) != null ?
+                        new RedeliveryPolicyConfig(
+                                (BMap<BString, Object>) configurations.getMapValue(REDELIVERY_POLICY)) : null
         );
     }
 }

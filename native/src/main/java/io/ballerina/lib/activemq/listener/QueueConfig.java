@@ -44,6 +44,8 @@ import static io.ballerina.lib.activemq.util.ActiveMQConstants.SESSION_ACK_MODE;
  *                        If this value is {@code null}, no selector is applied.
  * @param pollingInterval   The polling interval in milliseconds
  * @param receiveTimeout    The timeout to wait till a `receive` action finishes when there are no messages
+ * @param exclusive       Whether the queue is exclusive to the connection.
+ * @param redeliveryPolicyConfig The redelivery policy configuration for handling message redelivery
  *
  * @since 0.1.0
  */
