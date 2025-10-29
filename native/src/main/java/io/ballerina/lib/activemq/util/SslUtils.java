@@ -96,7 +96,7 @@ public final class SslUtils {
             // KeyStore (JKS/PKCS12 file)
             return getKeyManagerFactory(keyRecord).getKeyManagers();
         }
-        return null;
+        return new KeyManager[0];
     }
 
     public static SSLContext createSSLContext(String protocol, KeyManager[] keyManagers, TrustManager[] trustManagers)

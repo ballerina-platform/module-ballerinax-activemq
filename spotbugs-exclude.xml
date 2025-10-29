@@ -1,0 +1,60 @@
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com)
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<FindBugsFilter>
+    <!-- System.exit is intentional for fatal errors in error callback -->
+    <Match>
+        <Class name="io.ballerina.lib.activemq.listener.OnErrorCallback"/>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
+
+    <!-- JMS objects (Session, MessageConsumer) cannot be cloned - false positive -->
+    <Match>
+        <Class name="io.ballerina.lib.activemq.listener.MessageReceiver"/>
+        <Field name="session"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.lib.activemq.listener.MessageReceiver"/>
+        <Field name="consumer"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- ConnectionConfig is a record - expose internal representation is by design -->
+    <Match>
+        <Class name="io.ballerina.lib.activemq.listener.ConnectionConfig"/>
+        <Method name="properties"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.lib.activemq.listener.ConnectionConfig"/>
+        <Method name="secureSocket"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.lib.activemq.listener.ConnectionConfig"/>
+        <Method name="&lt;init&gt;"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- Service needs to return internal BObject for Ballerina runtime -->
+    <Match>
+        <Class name="io.ballerina.lib.activemq.listener.Service"/>
+        <Method name="getConsumerService"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+</FindBugsFilter>

@@ -117,6 +117,9 @@ public class MessageDispatcher {
                 case TypeTags.RECORD_TYPE_TAG:
                     args[idx++] = MessageMapper.toBallerinaMessage(message);
                     break;
+                default:
+                    throw new IllegalStateException("Unsupported parameter type: " + referredType);
+
             }
         }
         return args;
