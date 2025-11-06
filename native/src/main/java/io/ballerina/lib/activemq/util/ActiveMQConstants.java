@@ -28,8 +28,6 @@ import java.math.BigDecimal;
  */
 public interface ActiveMQConstants {
 
-    // Configuration field names
-    BString BROKER_URL = StringUtils.fromString("brokerURL");
     BString USERNAME = StringUtils.fromString("username");
     BString PASSWORD = StringUtils.fromString("password");
     BString CLIENT_ID = StringUtils.fromString("clientId");
@@ -60,7 +58,6 @@ public interface ActiveMQConstants {
     // SecureSocket field names
     BString CERT = StringUtils.fromString("cert");
     BString KEY = StringUtils.fromString("key");
-    BString PROTOCOL = StringUtils.fromString("protocol");
     BString CERT_FILE = StringUtils.fromString("certFile");
     BString KEY_FILE = StringUtils.fromString("keyFile");
     BString KEY_PASSWORD = StringUtils.fromString("keyPassword");
@@ -88,12 +85,7 @@ public interface ActiveMQConstants {
     // Message record field names
     BString MESSAGE_ID = StringUtils.fromString("messageId");
     BString CORRELATION_ID = StringUtils.fromString("correlationId");
-    BString TIMESTAMP = StringUtils.fromString("timestamp");
-    BString REDELIVERED = StringUtils.fromString("redelivered");
-    BString TYPE = StringUtils.fromString("type");
-    BString DESTINATION_FIELD = StringUtils.fromString("destination");
     BString REPLY_TO = StringUtils.fromString("replyTo");
-    BString PAYLOAD = StringUtils.fromString("payload");
     BString MESSAGE_PAYLOAD = StringUtils.fromString("payload");
     BString MESSAGE_PROPERTIES = StringUtils.fromString("properties");
     BString FORMAT_FIELD = StringUtils.fromString("format");
@@ -101,7 +93,6 @@ public interface ActiveMQConstants {
     BString EXPIRY_FIELD = StringUtils.fromString("expiry");
     BString PERSISTENCE_FIELD = StringUtils.fromString("persistence");
     BString MESSAGE_USERID = StringUtils.fromString("userId");
-    BString REPLY_TO_QUEUE_NAME_FIELD = StringUtils.fromString("replyToQueueName");
 
     // consumer tags
     String QUERY_PARAM_EXCLUSIVE_CONSUMER = "?consumer.exclusive=true";
@@ -117,10 +108,6 @@ public interface ActiveMQConstants {
 
     // Error
     String ACTIVEMQ_ERROR = "Error";
-    String ERROR_DETAILS = "ErrorDetails";
-    BString ERROR_REASON_CODE = StringUtils.fromString("reasonCode");
-    BString ERROR_ERROR_CODE = StringUtils.fromString("errorCode");
-    BString ERROR_COMPLETION_CODE = StringUtils.fromString("completionCode");
 
     // Millisecond multiplier for time conversions
     BigDecimal MILLISECOND_MULTIPLIER = new BigDecimal(1000);

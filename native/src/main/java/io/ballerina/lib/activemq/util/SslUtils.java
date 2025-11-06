@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -98,14 +97,6 @@ public final class SslUtils {
         }
         return new KeyManager[0];
     }
-
-    public static SSLContext createSSLContext(String protocol, KeyManager[] keyManagers, TrustManager[] trustManagers)
-            throws Exception {
-        SSLContext sslContext = SSLContext.getInstance(protocol);
-        sslContext.init(keyManagers, trustManagers, null);
-        return sslContext;
-    }
-
 
 
     /**
@@ -213,7 +204,10 @@ public final class SslUtils {
     private static KeyStore getKeyStore(BString path, BString password) throws Exception {
         try (FileInputStream is = new FileInputStream(path.getValue())) {
             char[] passphrase = password.getValue().toCharArray();
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            // Determine keystore type based on file extension
+            String keystoreType = path.getValue().endsWith(".p12") || path.getValue().endsWith(".pfx")
+                ? "PKCS12" : KeyStore.getDefaultType();
+            KeyStore ks = KeyStore.getInstance(keystoreType);
             ks.load(is, passphrase);
             return ks;
         }

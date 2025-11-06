@@ -27,7 +27,7 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.TextMessage;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.BMESSAGE_NAME;
@@ -40,8 +40,7 @@ import static io.ballerina.lib.activemq.util.ActiveMQConstants.MESSAGE_PROPERTIE
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.MESSAGE_USERID;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.PERSISTENCE_FIELD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.PRIORITY_FIELD;
-import static io.ballerina.lib.activemq.util.ActiveMQConstants.REPLY_TO_QUEUE_NAME_FIELD;
-import static io.ballerina.lib.activemq.util.CommonUtils.createError;
+import static io.ballerina.lib.activemq.util.ActiveMQConstants.REPLY_TO;
 import static io.ballerina.lib.activemq.util.ModuleUtils.getModule;
 
 /**
@@ -59,13 +58,19 @@ public class MessageMapper {
         BMap<BString, Object> result = ValueCreator.createRecordValue(getModule(), BMESSAGE_NAME);
 
         // Common properties - convert byte arrays to Ballerina arrays
-        result.put(MESSAGE_ID, ValueCreator.createArrayValue(safeBytes(message.getJMSMessageID())));
-        result.put(CORRELATION_ID, ValueCreator.createArrayValue(safeBytes(message.getJMSCorrelationID())));
+        result.put(MESSAGE_ID, StringUtils.fromString(message.getJMSMessageID()));
+        result.put(CORRELATION_ID, StringUtils.fromString(message.getJMSCorrelationID()));
         result.put(PRIORITY_FIELD, message.getJMSPriority());
-        result.put(EXPIRY_FIELD, (int) message.getJMSExpiration());
+        result.put(EXPIRY_FIELD, message.getJMSExpiration());
         result.put(PERSISTENCE_FIELD, message.getJMSDeliveryMode());
+//
+//
+//        message.getJMSTimestamp();
+//        message.getJMSDeliveryMode();
+//        message.getJMSDestination();
+//        message.getJMSRedelivered();
 
-        result.put(REPLY_TO_QUEUE_NAME_FIELD, (message.getJMSReplyTo() != null)
+        result.put(REPLY_TO, (message.getJMSReplyTo() != null)
                 ? StringUtils.fromString(message.getJMSReplyTo().toString()) : null);
         String userIdProperty = message.getStringProperty("JMSXUserID");
         result.put(MESSAGE_USERID, userIdProperty != null ? StringUtils.fromString(userIdProperty) : null);
@@ -82,16 +87,11 @@ public class MessageMapper {
 
         // Payload - convert byte arrays to Ballerina arrays
         if (message instanceof TextMessage) {
-            try {
-                byte[] payload = ((TextMessage) message).getText().getBytes("UTF-8");
-                result.put(MESSAGE_PAYLOAD, ValueCreator.createArrayValue(payload));
-            } catch (UnsupportedEncodingException e) {
-                throw createError("Error", "Unsupported encoding for TextMessage payload: UTF-8", e);
-            }
+            byte[] payload = ((TextMessage) message).getText().getBytes(StandardCharsets.UTF_8);
+            result.put(MESSAGE_PAYLOAD, ValueCreator.createArrayValue(payload));
             result.put(FORMAT_FIELD, TEXT);
 
-        } else if (message instanceof BytesMessage) {
-            BytesMessage bytesMessage = (BytesMessage) message;
+        } else if (message instanceof BytesMessage bytesMessage) {
             byte[] payload = new byte[(int) bytesMessage.getBodyLength()];
             bytesMessage.readBytes(payload);
             result.put(MESSAGE_PAYLOAD, ValueCreator.createArrayValue(payload));
@@ -99,20 +99,12 @@ public class MessageMapper {
 
         } else {
             // fallback: try getBody
-            byte[] fallback = null;
-            try {
-                fallback = message.getBody(String.class).getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw createError("Error", "Unsupported encoding for message body: UTF-8", e);
-            }
+            byte[] fallback;
+            fallback = message.getBody(String.class).getBytes(StandardCharsets.UTF_8);
             result.put(MESSAGE_PAYLOAD, ValueCreator.createArrayValue(fallback));
             result.put(FORMAT_FIELD, UNKNOWN);
         }
         result.addNativeData(NATIVE_MESSAGE, message);
         return result;
-    }
-
-    private static byte[] safeBytes(String value) {
-        return value != null ? value.getBytes(java.nio.charset.StandardCharsets.UTF_8) : new byte[0];
     }
 }

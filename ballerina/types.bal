@@ -95,7 +95,7 @@ public type CertKey record {|
 #            expire
 # + persistence - Message delivery mode: 1 for non-persistent (faster but may be lost on broker
 #                 failure), 2 for persistent (slower but survives broker restarts)
-# + replyToQueueName - Name of the queue or topic where replies should be sent (used in
+# + replyTo - Name of the queue or topic where replies should be sent (used in
 #                      request-reply patterns)
 # + userId - Identifier of the user who sent the message (if available from the broker)
 # + format - Format identifier of the message payload (e.g., "text", "binary", "json")
@@ -107,7 +107,7 @@ public type Message record {|
     int priority?;
     int expiry?;
     int persistence?;
-    string replyToQueueName?;
+    string replyTo?;
     string userId?;
     string format?;
     map<anydata> properties?;

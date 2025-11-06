@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  activemq:
+    image: 'apache/activemq-classic:6.0.0'
+    container_name: activemq-test-server
+    ports:
+      - '61616:61616'  # OpenWire protocol
+      - '8161:8161'    # Web console
+    environment:
+      - ACTIVEMQ_MIN_MEMORY=512
+      - ACTIVEMQ_MAX_MEMORY=2048
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep 61616 | grep LISTEN"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - activemq-test-network
+
+  activemq-ssl:
+    image: 'apache/activemq-classic:6.0.0'
+    container_name: activemq-ssl-test-server
+    ports:
+      - '61617:61617'  # SSL OpenWire protocol
+      - '8162:8161'    # Web console
+    environment:
+      - ACTIVEMQ_MIN_MEMORY=512
+      - ACTIVEMQ_MAX_MEMORY=2048
+    volumes:
+      - ./secrets/server-keystore.jks:/opt/apache-activemq/conf/broker.ks:ro
+      - ./secrets/server-truststore.jks:/opt/apache-activemq/conf/broker.ts:ro
+      - ./configs/activemq-ssl.xml:/opt/apache-activemq/conf/activemq.xml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep 61617 | grep LISTEN"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - activemq-test-network
+
+networks:
+  activemq-test-network:
+    driver: bridge

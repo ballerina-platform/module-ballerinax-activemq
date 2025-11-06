@@ -19,7 +19,6 @@
 package io.ballerina.lib.activemq.util;
 
 import io.ballerina.runtime.api.creators.ErrorCreator;
-import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -27,7 +26,6 @@ import io.ballerina.runtime.api.values.BString;
 
 import java.util.Optional;
 
-import static io.ballerina.lib.activemq.util.ActiveMQConstants.ERROR_DETAILS;
 import static io.ballerina.lib.activemq.util.ModuleUtils.getModule;
 
 /**
@@ -64,9 +62,8 @@ public class CommonUtils {
         if (throwable != null) {
             cause = ErrorCreator.createError(throwable);
         }
-        BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(getModule(), ERROR_DETAILS);
         return ErrorCreator.createError(
-                getModule(), errorType, StringUtils.fromString(message), cause, errorDetails);
+                getModule(), errorType, StringUtils.fromString(message), cause, null);
     }
 
     /**
