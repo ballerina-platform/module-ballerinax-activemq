@@ -253,4 +253,189 @@ public final class TestProducer {
             }
         }
     }
+
+    /**
+     * Send a message with all JMS headers set for testing purposes.
+     *
+     * @param brokerUrl The broker URL
+     * @param queueName The queue name
+     * @param message   The message text
+     * @throws JMSException If message sending fails
+     */
+    public static void sendMessageWithAllHeaders(BString brokerUrl, BString queueName, BString message)
+            throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            ActiveMQConnectionFactory connectionFactory = createConnectionFactory(brokerUrl.getValue());
+            connection = connectionFactory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName.getValue());
+            producer = session.createProducer(destination);
+
+            TextMessage textMessage = session.createTextMessage(message.getValue());
+
+            // Set various JMS headers
+            textMessage.setJMSCorrelationID("test-correlation-id");
+            textMessage.setJMSType("TestMessageType");
+            textMessage.setJMSPriority(5);
+            textMessage.setJMSReplyTo(destination);
+            // Note: JMSTimestamp, JMSDestination, JMSMessageID, JMSRedelivered are set by broker
+
+            producer.send(textMessage, jakarta.jms.DeliveryMode.PERSISTENT, 5, 60000); // 1 min TTL
+        } catch (JMSException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JMSException("Failed to create connection: " + e.getMessage());
+        } finally {
+            if (producer != null) {
+                producer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    /**
+     * Send a message with JMSType set.
+     *
+     * @param brokerUrl   The broker URL
+     * @param queueName   The queue name
+     * @param message     The message text
+     * @param messageType The JMS message type
+     * @throws JMSException If message sending fails
+     */
+    public static void sendMessageWithType(BString brokerUrl, BString queueName, BString message,
+                                           BString messageType) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            ActiveMQConnectionFactory connectionFactory = createConnectionFactory(brokerUrl.getValue());
+            connection = connectionFactory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName.getValue());
+            producer = session.createProducer(destination);
+
+            TextMessage textMessage = session.createTextMessage(message.getValue());
+            textMessage.setJMSType(messageType.getValue());
+
+            producer.send(textMessage);
+        } catch (JMSException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JMSException("Failed to create connection: " + e.getMessage());
+        } finally {
+            if (producer != null) {
+                producer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    /**
+     * Send a persistent message.
+     *
+     * @param brokerUrl The broker URL
+     * @param queueName The queue name
+     * @param message   The message text
+     * @throws JMSException If message sending fails
+     */
+    public static void sendPersistentMessage(BString brokerUrl, BString queueName, BString message)
+            throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            ActiveMQConnectionFactory connectionFactory = createConnectionFactory(brokerUrl.getValue());
+            connection = connectionFactory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName.getValue());
+            producer = session.createProducer(destination);
+
+            TextMessage textMessage = session.createTextMessage(message.getValue());
+
+            // Send with PERSISTENT delivery mode
+            producer.send(textMessage, jakarta.jms.DeliveryMode.PERSISTENT,
+                    jakarta.jms.Message.DEFAULT_PRIORITY, jakarta.jms.Message.DEFAULT_TIME_TO_LIVE);
+        } catch (JMSException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JMSException("Failed to create connection: " + e.getMessage());
+        } finally {
+            if (producer != null) {
+                producer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    /**
+     * Send a non-persistent message.
+     *
+     * @param brokerUrl The broker URL
+     * @param queueName The queue name
+     * @param message   The message text
+     * @throws JMSException If message sending fails
+     */
+    public static void sendNonPersistentMessage(BString brokerUrl, BString queueName, BString message)
+            throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            ActiveMQConnectionFactory connectionFactory = createConnectionFactory(brokerUrl.getValue());
+            connection = connectionFactory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName.getValue());
+            producer = session.createProducer(destination);
+
+            TextMessage textMessage = session.createTextMessage(message.getValue());
+
+            // Send with NON_PERSISTENT delivery mode
+            producer.send(textMessage, jakarta.jms.DeliveryMode.NON_PERSISTENT,
+                    jakarta.jms.Message.DEFAULT_PRIORITY, jakarta.jms.Message.DEFAULT_TIME_TO_LIVE);
+        } catch (JMSException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JMSException("Failed to create connection: " + e.getMessage());
+        } finally {
+            if (producer != null) {
+                producer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
 }

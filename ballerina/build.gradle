@@ -92,10 +92,56 @@ tasks.register('commitTomlFiles') {
     }
 }
 
+tasks.register('startActiveMQServer') {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=activemq-test-server"
+                standardOutput = stdOut
+            }
+            if (!stdOut.toString().contains("activemq-test-server")) {
+                println "Starting ActiveMQ server and waiting for it to be healthy..."
+                exec {
+                    commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml up --wait"
+                    standardOutput = stdOut
+                }
+                println "ActiveMQ server is ready."
+            } else {
+                println "ActiveMQ server is already running."
+            }
+        }
+    }
+}
+
+tasks.register('stopActiveMQServer') {
+    doLast {
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def stdOut = new ByteArrayOutputStream()
+            exec {
+                commandLine 'sh', '-c', "docker ps --filter name=activemq-test-server"
+                standardOutput = stdOut
+            }
+            if (stdOut.toString().contains("activemq-test-server")) {
+                println "Stopping ActiveMQ server."
+                exec {
+                    commandLine 'sh', '-c', "docker compose -f tests/resources/docker-compose.yaml down"
+                    standardOutput = stdOut
+                }
+                println stdOut.toString()
+            } else {
+                println "ActiveMQ server is not started."
+            }
+        }
+    }
+}
+
 build.dependsOn copyToLib
 build.dependsOn ":${packageName}-native:build"
 
 test.dependsOn ":${packageName}-native:build"
+test.dependsOn "startActiveMQServer"
+test.finalizedBy "stopActiveMQServer"
 
 publish.dependsOn build
 publishToMavenLocal.dependsOn build

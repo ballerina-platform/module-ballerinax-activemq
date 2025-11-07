@@ -74,3 +74,45 @@ isolated function sendToTopicWithProperties(string brokerUrl, string topicName, 
 isolated function sendBytesToQueue(string brokerUrl, string queueName, byte[] payload) returns error? = @java:Method {
     'class: "io.ballerina.lib.activemq.util.TestProducer"
 } external;
+
+# Send a message with all JMS headers set (for testing message field mapping)
+#
+# + brokerUrl - The broker URL (e.g., "tcp://localhost:61616")
+# + queueName - The queue name
+# + message - The message text
+# + return - Error if sending fails
+isolated function sendMessageWithAllHeaders(string brokerUrl, string queueName, string message) returns error? = @java:Method {
+    'class: "io.ballerina.lib.activemq.util.TestProducer"
+} external;
+
+# Send a message with JMSType set
+#
+# + brokerUrl - The broker URL (e.g., "tcp://localhost:61616")
+# + queueName - The queue name
+# + message - The message text
+# + messageType - The JMS message type
+# + return - Error if sending fails
+isolated function sendMessageWithType(string brokerUrl, string queueName, string message,
+                                      string messageType) returns error? = @java:Method {
+    'class: "io.ballerina.lib.activemq.util.TestProducer"
+} external;
+
+# Send a persistent message
+#
+# + brokerUrl - The broker URL (e.g., "tcp://localhost:61616")
+# + queueName - The queue name
+# + message - The message text
+# + return - Error if sending fails
+isolated function sendPersistentMessage(string brokerUrl, string queueName, string message) returns error? = @java:Method {
+    'class: "io.ballerina.lib.activemq.util.TestProducer"
+} external;
+
+# Send a non-persistent message
+#
+# + brokerUrl - The broker URL (e.g., "tcp://localhost:61616")
+# + queueName - The queue name
+# + message - The message text
+# + return - Error if sending fails
+isolated function sendNonPersistentMessage(string brokerUrl, string queueName, string message) returns error? = @java:Method {
+    'class: "io.ballerina.lib.activemq.util.TestProducer"
+} external;

@@ -7,6 +7,12 @@
 # These are Windows script files and should use crlf
 *.bat           text eol=crlf
 
+# Java source files should always use LF
+*.java          text eol=lf
+
+# Ballerina files should use LF
+*.bal           text eol=lf
+
 # Binary files should be left untouched
 *.jar           binary
 
