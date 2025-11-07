@@ -84,15 +84,20 @@ public interface ActiveMQConstants {
 
     // Message record field names
     BString MESSAGE_ID = StringUtils.fromString("messageId");
+    BString TIMESTAMP_FIELD = StringUtils.fromString("timestamp");
     BString CORRELATION_ID = StringUtils.fromString("correlationId");
     BString REPLY_TO = StringUtils.fromString("replyTo");
-    BString MESSAGE_PAYLOAD = StringUtils.fromString("payload");
-    BString MESSAGE_PROPERTIES = StringUtils.fromString("properties");
-    BString FORMAT_FIELD = StringUtils.fromString("format");
-    BString PRIORITY_FIELD = StringUtils.fromString("priority");
+    BString DESTINATION_FIELD = StringUtils.fromString("destination");
+    BString PERSISTENT_FIELD = StringUtils.fromString("persistent");
+    BString REDELIVERED_FIELD = StringUtils.fromString("redelivered");
+    BString TYPE_FIELD = StringUtils.fromString("type");
     BString EXPIRY_FIELD = StringUtils.fromString("expiry");
-    BString PERSISTENCE_FIELD = StringUtils.fromString("persistence");
+    BString DELIVERY_TIME_FIELD = StringUtils.fromString("deliveryTime");
+    BString PRIORITY_FIELD = StringUtils.fromString("priority");
     BString MESSAGE_USERID = StringUtils.fromString("userId");
+    BString FORMAT_FIELD = StringUtils.fromString("format");
+    BString MESSAGE_PROPERTIES = StringUtils.fromString("properties");
+    BString MESSAGE_PAYLOAD = StringUtils.fromString("payload");
 
     // consumer tags
     String QUERY_PARAM_EXCLUSIVE_CONSUMER = "?consumer.exclusive=true";

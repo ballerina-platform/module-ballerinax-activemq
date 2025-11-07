@@ -87,27 +87,41 @@ public type CertKey record {|
 # Represents a message received from an ActiveMQ broker.
 #
 # + messageId - Unique identifier assigned to the message by the JMS provider
+# + timestamp - The time when the message was handed to the provider to be sent (in milliseconds
+#               since epoch)
 # + correlationId - Optional identifier used to correlate this message with another (typically used
 #                   in request-reply patterns)
-# + priority - Message priority level (0-9, where 0-4 is normal priority and 5-9 is expedited
-#              priority)
+# + replyTo - Name of the queue or topic where replies should be sent (used in
+#             request-reply patterns)
+# + destination - The destination (queue or topic name) where the message was sent
+# + persistent - Message delivery mode: true for persistent (survives broker restarts), false for
+#                non-persistent (faster but may be lost on broker failure)
+# + redelivered - Indicates whether this message is being redelivered after a previous delivery
+#                 attempt failed
+# + 'type - Message type identifier string (provider-specific or application-defined) used for
+#           message classification and filtering
 # + expiry - Timestamp (in milliseconds since epoch) when the message expires, or 0 if it doesn't
 #            expire
-# + persistence - Message delivery mode: 1 for non-persistent (faster but may be lost on broker
-#                 failure), 2 for persistent (slower but survives broker restarts)
-# + replyTo - Name of the queue or topic where replies should be sent (used in
-#                      request-reply patterns)
+# + deliveryTime - The earliest time when the message can be delivered to a consumer (in
+#                  milliseconds since epoch), or 0 if no delivery delay
+# + priority - Message priority level (0-9, where 0-4 is normal priority and 5-9 is expedited
+#              priority)
 # + userId - Identifier of the user who sent the message (if available from the broker)
 # + format - Format identifier of the message payload (e.g., "text", "binary", "json")
 # + properties - Application-specific custom properties attached to the message
 # + payload - The message content as a byte array
 public type Message record {|
     string messageId;
+    int timestamp?;
     string correlationId?;
-    int priority?;
-    int expiry?;
-    int persistence?;
     string replyTo?;
+    string destination?;
+    boolean persistent?;
+    boolean redelivered?;
+    string 'type?;
+    int expiry?;
+    int deliveryTime?;
+    int priority?;
     string userId?;
     string format?;
     map<anydata> properties?;

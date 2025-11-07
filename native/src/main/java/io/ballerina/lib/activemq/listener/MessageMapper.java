@@ -32,15 +32,20 @@ import java.util.Enumeration;
 
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.BMESSAGE_NAME;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.CORRELATION_ID;
+import static io.ballerina.lib.activemq.util.ActiveMQConstants.DELIVERY_TIME_FIELD;
+import static io.ballerina.lib.activemq.util.ActiveMQConstants.DESTINATION_FIELD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.EXPIRY_FIELD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.FORMAT_FIELD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.MESSAGE_ID;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.MESSAGE_PAYLOAD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.MESSAGE_PROPERTIES;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.MESSAGE_USERID;
-import static io.ballerina.lib.activemq.util.ActiveMQConstants.PERSISTENCE_FIELD;
+import static io.ballerina.lib.activemq.util.ActiveMQConstants.PERSISTENT_FIELD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.PRIORITY_FIELD;
+import static io.ballerina.lib.activemq.util.ActiveMQConstants.REDELIVERED_FIELD;
 import static io.ballerina.lib.activemq.util.ActiveMQConstants.REPLY_TO;
+import static io.ballerina.lib.activemq.util.ActiveMQConstants.TIMESTAMP_FIELD;
+import static io.ballerina.lib.activemq.util.ActiveMQConstants.TYPE_FIELD;
 import static io.ballerina.lib.activemq.util.ModuleUtils.getModule;
 
 /**
@@ -57,23 +62,56 @@ public class MessageMapper {
     public static BMap<BString, Object> toBallerinaMessage(Message message) throws JMSException {
         BMap<BString, Object> result = ValueCreator.createRecordValue(getModule(), BMESSAGE_NAME);
 
-        // Common properties - convert byte arrays to Ballerina arrays
+        // Standard JMS message headers
         result.put(MESSAGE_ID, StringUtils.fromString(message.getJMSMessageID()));
-        result.put(CORRELATION_ID, StringUtils.fromString(message.getJMSCorrelationID()));
-        result.put(PRIORITY_FIELD, message.getJMSPriority());
-        result.put(EXPIRY_FIELD, message.getJMSExpiration());
-        result.put(PERSISTENCE_FIELD, message.getJMSDeliveryMode());
-//
-//
-//        message.getJMSTimestamp();
-//        message.getJMSDeliveryMode();
-//        message.getJMSDestination();
-//        message.getJMSRedelivered();
 
-        result.put(REPLY_TO, (message.getJMSReplyTo() != null)
-                ? StringUtils.fromString(message.getJMSReplyTo().toString()) : null);
-        String userIdProperty = message.getStringProperty("JMSXUserID");
-        result.put(MESSAGE_USERID, userIdProperty != null ? StringUtils.fromString(userIdProperty) : null);
+        long timestamp = message.getJMSTimestamp();
+        if (timestamp > 0) {
+            result.put(TIMESTAMP_FIELD, timestamp);
+        }
+
+        String correlationId = message.getJMSCorrelationID();
+        if (correlationId != null) {
+            result.put(CORRELATION_ID, StringUtils.fromString(correlationId));
+        }
+
+        if (message.getJMSReplyTo() != null) {
+            result.put(REPLY_TO, StringUtils.fromString(message.getJMSReplyTo().toString()));
+        }
+
+        if (message.getJMSDestination() != null) {
+            result.put(DESTINATION_FIELD, StringUtils.fromString(message.getJMSDestination().toString()));
+        }
+
+        // Convert JMSDeliveryMode (1=non-persistent, 2=persistent) to boolean
+        result.put(PERSISTENT_FIELD, message.getJMSDeliveryMode() == 2);
+
+        result.put(REDELIVERED_FIELD, message.getJMSRedelivered());
+
+        String type = message.getJMSType();
+        if (type != null) {
+            result.put(TYPE_FIELD, StringUtils.fromString(type));
+        }
+
+        long expiry = message.getJMSExpiration();
+        if (expiry > 0) {
+            result.put(EXPIRY_FIELD, expiry);
+        }
+
+        long deliveryTime = message.getJMSDeliveryTime();
+        if (deliveryTime > 0) {
+            result.put(DELIVERY_TIME_FIELD, deliveryTime);
+        }
+
+        int priority = message.getJMSPriority();
+        if (priority > 0) {
+            result.put(PRIORITY_FIELD, priority);
+        }
+
+        String userID = message.getStringProperty("JMSXUserID");
+        if (userID != null) {
+            result.put(MESSAGE_USERID, StringUtils.fromString(userID));
+        }
 
         // Custom Properties
         BMap<BString, Object> props = ValueCreator.createMapValue();
